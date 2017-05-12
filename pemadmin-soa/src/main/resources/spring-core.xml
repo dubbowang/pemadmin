@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- 开启自动注入 -->
+    <context:annotation-config />
+
+    <context:property-placeholder location="*.properties" ignore-unresolvable="true" />
+
+    <!-- 不包含Controller类 -->
+     <context:component-scan base-package="com.qingke.pemadmin" use-default-filters="true">
+        <context:exclude-filter type="annotation"  expression="org.springframework.stereotype.Controller" />
+        <context:exclude-filter type="annotation"  expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+    </context:component-scan>
+
+    <!-- 数据源配置 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+        init-method="init" destroy-method="close">
+        <!-- 数据库基本信息配置 -->
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <!-- 初始化连接数量 -->
+        <property name="initialSize" value="${jdbc.initialSize}" />
+        <!-- 最大并发连接数 -->
+        <property name="maxActive" value="${jdbc.maxActive}" />
+        <!-- 最小空闲连接数 -->
+        <property name="minIdle" value="${jdbc.minIdle}" />
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${jdbc.maxWait}" />
+        <!-- 超过时间限制是否回收 -->
+        <property name="removeAbandoned" value="${jdbc.removeAbandoned}" />
+        <!-- 超过时间限制多长； -->
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}" />
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+        <!-- 用来检测连接是否有效的sql，要求是一个查询语句 -->
+        <property name="validationQuery" value="${jdbc.validationQuery}" />
+        <!-- 申请连接的时候检测 -->
+        <property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+        <!-- 申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+        <property name="testOnBorrow" value="${jdbc.testOnBorrow}" />
+        <!-- 归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+        <property name="testOnReturn" value="${jdbc.testOnReturn}" />
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="${jdbc.poolPreparedStatements}" />
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+            value="${jdbc.maxPoolPreparedStatementPerConnectionSize}" />
+        <!--属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有： 监控统计用的filter:stat 日志用的filter:log4j 防御SQL注入的filter:wall -->
+        <property name="filters" value="${jdbc.filters}" />
+    </bean>
+
+    <!-- 创建sqlsessionFactory 并指定数据源 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource">
+            <ref bean="dataSource" />
+        </property>
+        <property name="configurationProperties">
+            <props>
+                <prop key="cacheEnabled">false</prop>
+                <!-- 查询时，关闭关联对象即时加载以提高性能 -->
+                <prop key="lazyLoadingEnabled">false</prop>
+                <!-- 设置关联对象加载的形态，此处为按需加载字段(加载字段由SQL指定)，不会加载关联表的所有字段，以提高性能 -->
+                <prop key="aggressiveLazyLoading">true</prop>
+                <!-- 对于未知的SQL查询，允许返回不同的结果集以达到通用的效果 -->
+                <prop key="multipleResultSetsEnabled">true</prop>
+                <!-- 允许使用列标签代替列名 -->
+                <prop key="useColumnLabel">true</prop>
+                <!-- 允许使用自定义的主键值(比如由程序生成的UUID 32位编码作为键值)，数据表的PK生成策略将被覆盖 -->
+                <prop key="useGeneratedKeys">true</prop>
+                <!-- 给予被嵌套的resultMap以字段-属性的映射支持 -->
+                <prop key="autoMappingBehavior">FULL</prop>
+                <!-- 对于批量更新操作缓存SQL以提高性能 -->
+                <prop key="defaultExecutorType">BATCH</prop>
+                <!-- 数据库超过25000秒仍未响应则超时 -->
+                <prop key="defaultStatementTimeout">25000</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- Mapper接口所在包名，Spring会自动查找其下的Mapper -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.qinke.pemadmin.dao" />
+    </bean>
+
+    <bean id="txManager"
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="txManager" />
+
+   <!-- 数据库版本管理 -->
+    <bean id="flyway" class="org.flywaydb.core.Flyway" init-method="migrate" lazy-init="false">
+        <property name="dataSource" ref="dataSource" />
+        <property name="baselineOnMigrate" value="true" />
+        <property name="locations" value="classpath:db/" />
+    </bean>
+</beans>

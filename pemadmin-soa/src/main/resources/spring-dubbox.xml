@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- 和本地bean一样实现服务 -->
+    <bean id="testServiceImpl"     class="com.qinke.pemadmin.api.TestServiceImpl"/>
+
+    <!-- 提供方应用信息，name为注册服务的名称，还有版本，所属者等属性 -->
+    <dubbo:application name="pemadmin-provider" logger="slf4j"/>
+
+    <!-- 使用zookeeper注册中心暴露服务地址 -->
+    <dubbo:registry address="zookeeper://172.168.11.134:2181" />
+
+    <!-- 用dubbo协议在20880端口暴露服务 -->
+    <dubbo:protocol name="dubbo" port="-1"/>
+
+    <!-- 声明需要暴露的服务接口，interface:接口路径，ref:服务实现定义的id，即下面一行配置的id -->
+    <dubbo:service interface="com.qinke.pemadmin.api.TestService" ref="testServiceImpl" timeout="60000"/>
+
+</beans>
