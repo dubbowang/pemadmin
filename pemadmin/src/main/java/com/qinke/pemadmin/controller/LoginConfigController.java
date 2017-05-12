@@ -55,31 +55,7 @@ public class LoginConfigController extends BaseResources {
 
         return getResponseModel(result);
     }
-
-    @RequestMapping(value = "/get/anon", method = RequestMethod.GET)
-    public ResponseModel getAnon() {
-        OauthInfo oauthInfo = new OauthInfo();
-        oauthInfo.setClient_id(oAuthProp.getClient_id());
-        oauthInfo.setClient_secret(oAuthProp.getClient_secret());
-        oauthInfo.setGrant_type(oAuthProp.getGrant_type());
-        oauthInfo.setOauth_accesstoken_rul(oAuthProp.getOauth_accesstoken_rul());
-        oauthInfo.setRedirect_uri(oAuthProp.getRedirect_uri());
-        oauthInfo.setResponse_type(oAuthProp.getResponse_type());
-        oauthInfo.setUser_resources_rul(oAuthProp.getUser_resources_rul());
-        oauthInfo.setLogin_resources_rul(oAuthProp.getLogin_resources_rul());
-        oauthInfo.setSys_rul(oAuthProp.getSys_rul());
-
-        String result = "";
-
-        try {
-            result = mapper.writeValueAsString(oauthInfo);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            LogUtil.error(e);
-        }
-
-        return getResponseModel(result);
-    }
+ 
 
     @SuppressWarnings("unused")
     @RequestMapping(value = "/put", method = RequestMethod.PUT)
