@@ -1,6 +1,8 @@
 package com.qinke.pemadmin.viewmodel;
 
 
+
+
 public class OauthInfo {
 
 	private String client_id;
